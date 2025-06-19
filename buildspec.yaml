@@ -44,29 +44,29 @@ phases:
       - echo "Injecting ECR URI  into web/web-deployment..."
       - sed -i "s|__ECR_URI__|$ECR_URI|g" web/web-deployment.yaml
       
-      # Deploy app-tier to EKS
-      - echo "Deploying App Tier to EKS..."
-      - kubectl apply --validate=false -f app/app-deployment.yaml
+      # # Deploy app-tier to EKS
+      # - echo "Deploying App Tier to EKS..."
+      # - kubectl apply --validate=false -f app/app-deployment.yaml
 
-      # Wait for the LoadBalancer hostname
-      - echo "Waiting for App LoadBalancer to become available..."
-      - |
-        for i in {1..60}; do
-          APP_ELB=$(kubectl get svc user-app-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-          if [[ "$APP_ELB" != "" ]]; then
-            echo "Found App ELB: $APP_ELB"
-            break
-          fi
-          echo "Waiting... ($i/60)"
-          sleep 5
-        done
-      - if [[ "$APP_ELB" == "" ]]; then echo "App ELB not available after timeout!" && exit 1; fi
+      # # Wait for the LoadBalancer hostname
+      # - echo "Waiting for App LoadBalancer to become available..."
+      # - |
+      #   for i in {1..60}; do
+      #     APP_ELB=$(kubectl get svc user-app-service -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+      #     if [[ "$APP_ELB" != "" ]]; then
+      #       echo "Found App ELB: $APP_ELB"
+      #       break
+      #     fi
+      #     echo "Waiting... ($i/60)"
+      #     sleep 5
+      #   done
+      # - if [[ "$APP_ELB" == "" ]]; then echo "App ELB not available after timeout!" && exit 1; fi
 
-      # Update nginx.conf with APP_ELB
-      - echo "Injecting App ELB into web/nginx.conf..."
-      - sed -i "s|__APP_ELB__|$APP_ELB|g" web/nginx.conf
+      # # Update nginx.conf with APP_ELB
+      # - echo "Injecting App ELB into web/nginx.conf..."
+      # - sed -i "s|__APP_ELB__|$APP_ELB|g" web/nginx.conf
 
-      # Build and push web-tier
+      # # Build and push web-tier
       - echo "Building Web Tier Docker image..."
       - docker build -t $WEB_IMAGE_NAME ./web
       - docker tag $WEB_IMAGE_NAME:latest $ECR_URI/$WEB_IMAGE_NAME:latest
@@ -79,3 +79,4 @@ artifacts:
   base-directory: web
   files:
     - web-deployment.yaml
+    - app-deployment.yaml
