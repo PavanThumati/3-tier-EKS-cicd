@@ -6,7 +6,7 @@ env:
     EKS_CLUSTER_NAME: MyEKSCluster
     APP_IMAGE_NAME: app-tier-image
     WEB_IMAGE_NAME: web-tier-image
-    ECR_URI: 047719630685.dkr.ecr.us-east-2.amazonaws.com
+    ECR_URI: 047719630685.dkr.ecr.$AWS_REGION.amazonaws.com
     AWS_ACCOUNT_ID: 047719630685
 
 phases:
@@ -38,6 +38,9 @@ phases:
       - docker tag $APP_IMAGE_NAME:latest $ECR_URI/$APP_IMAGE_NAME:latest
       - docker push $ECR_URI/$APP_IMAGE_NAME:latest
 
+      # Update ECR URI
+      - echo "Injecting ECR URI  into app/app-deployment..."
+      - sed -i "s|ECR_URI|$ECR_URI|g" app/app-deployment
       # Deploy app-tier to EKS
       - echo "Deploying App Tier to EKS..."
       - kubectl apply --validate=false -f app/app-deployment.yaml
